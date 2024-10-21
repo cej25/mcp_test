@@ -19,7 +19,6 @@
 #include <fstream>
 #include <ctime>
 #include <string> //
-// #include <filesystem>
 #include <dirent.h>
 #include <unistd.h>
 #include <termios.h>
@@ -40,6 +39,8 @@ namespace fs = std::filesystem;
 // :: 1. Plots histograms                                                                  //
 // :: 2. Does analysis??                                                                   //
 // :: 3. Profit??                                                                          // 
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
+// To use :: $ bash plot                                                                   //
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
 
@@ -229,31 +230,49 @@ int main()
     EntryMCP entryMCP2;
     int countMCP1 = 0;
     int countMCP2 = 0;
+    int mcp_triggers = 0;
 
 	while (tr.Next())
 	{
-        if (*MCP == 1 && *Complete && countMCP1 == 0)
+        if (*MCP == 1)
         {
-            entryMCP1.Trigger_Time = *Trigger_Time;
-            entryMCP1.X1 = *X1;
-            entryMCP1.X2 = *X2;
-            entryMCP1.Y1 = *Y1;
-            entryMCP1.Y2 = *Y2;
+            if (*Complete)
+            {
+                completeMCP1++;
 
-            completeMCP1++;
-            countMCP1++;
+                if (countMCP1 == 0)
+                {
+                    entryMCP1.Trigger_Time = *Trigger_Time;
+                    entryMCP1.X1 = *X1;
+                    entryMCP1.X2 = *X2;
+                    entryMCP1.Y1 = *Y1;
+                    entryMCP1.Y2 = *Y2;
+
+                    countMCP1++;
+                }
+            }
+            else incompleteMCP1++; 
         }
 
-        if (*MCP == 2 && *Complete && countMCP2 == 0)
-        {
-            entryMCP2.Trigger_Time = *Trigger_Time;
-            entryMCP2.X1 = *X1;
-            entryMCP2.X2 = *X2;
-            entryMCP2.Y1 = *Y1;
-            entryMCP2.Y2 = *Y2;
+        if (*MCP == 2)
+        {   
+            if (*Complete)
+            {
+                completeMCP2++;
 
-            completeMCP2++;
-            countMCP2++;
+                if (countMCP2 == 0)
+                {
+                    entryMCP2.Trigger_Time = *Trigger_Time;
+                    entryMCP2.X1 = *X1;
+                    entryMCP2.X2 = *X2;
+                    entryMCP2.Y1 = *Y1;
+                    entryMCP2.Y2 = *Y2;
+
+                    countMCP2++;
+                }
+            }
+            else incompleteMCP2++;
+            
         }
 
         if (entryMCP1.Trigger_Time != 0 && entryMCP2.Trigger_Time != 0)
@@ -317,27 +336,17 @@ int main()
         
         }
 
-        // if (!*Complete)
-        // {
-        //     //??
-        //     incompleteEvent++;
-        //     if (*MCP == 1) incompleteMCP1++;
-        //     if (*MCP == 2) incompleteMCP2++;
-        // }
-    
+        mcp_triggers++;
+
 	} // tree reader loop
 
+    std::cout << "Complete events: " << completeEvent << std::endl;
+
+    std::cout << "Complete MCP1: " << completeMCP1 << "(" << 100 * completeMCP1 / (completeMCP1 + incompleteMCP1) << "%)" << std::endl;
+    std::cout << "Complete MCP2: " << completeMCP2 << "(" << 100 * completeMCP2 / (completeMCP2 + incompleteMCP2) << "%)" << std::endl;
+    std::cout << "Total MCP trigger signals: " << mcp_triggers << std::endl;
+
   } // File loop
-
-    // std::cout << "Complete events: " << completeEvent << "(" << 100 * completeEvent / (completeEvent + incompleteEvent) << "%)" << std::endl;
-    // std::cout << "Incomplete events: " << incompleteEvent<< "(" << 100 * incompleteEvent / (completeEvent + incompleteEvent) << "%)" << std::endl;
-
-    // std::cout << "Complete MCP1: " << completeMCP1 << std::endl;
-    // std::cout << "Complete MPC2: " << completeMCP2 << std::endl;
-
-    // std::cout << "Incomplete MCP1: " << incompleteMCP1 << std::endl;
-	// std::cout << "Incomplete MPC2: " << incompleteMCP2 << std::endl;
-
   
   std::cout << "Writing histograms to file." << std::endl;
   

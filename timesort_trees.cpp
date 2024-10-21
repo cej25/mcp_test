@@ -19,7 +19,6 @@
 #include <fstream>
 #include <ctime>
 #include <string> //
-// #include <filesystem>
 #include <dirent.h>
 #include <unistd.h>
 #include <termios.h>
@@ -39,7 +38,8 @@ namespace fs = std::filesystem;
 // :: 3. Orders MCP events by timestamp.                                                   //
 // :: 4. Writes MCP event information to a tree "SortedData".                              // 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
-
+// To use :: $ bash sort                                                                   //
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
 std::string Ordner = "../"; // path to run folder
 std::string Runname = "run_9"; // run number
@@ -283,7 +283,6 @@ void sortAndFillTree(const char *inputFileName, const char *outputFileName)
   outputTree->Write();
 
   outputFile.Close();
-
   inputFile->Close();
 }
 
@@ -364,8 +363,7 @@ int main()
     sortAndFillTree(filepathCStr, SfilepathCStr);
     std::cout << "completed" << std::endl;
     
-    // CEJ: finish first phase here, only need to timesort once
-  } // loop files
+  } // Loop files
 
   return 0;
 }

@@ -236,11 +236,15 @@ int main()
     int countMCP1 = 0;
     int countMCP2 = 0;
     int mcp_triggers = 0;
+    Long64_t last_mcp1_time = 0;
+    Long64_t last_mcp2_time = 0;
 
 	while (tr.Next())
 	{
         if (*MCP == 1)
         {
+            last_mcp1_time = *Trigger_Time;
+
             if (*Complete)
             {
                 completeMCP1++;
@@ -274,6 +278,8 @@ int main()
 
         if (*MCP == 2)
         {   
+            last_mcp2_time = *Trigger_Time;
+
             if (*Complete)
             {
                 completeMCP2++;
@@ -306,10 +312,20 @@ int main()
             
         }
 
+        // fill tdiff no matter what
+        if (last_mcp1_time != 0 && last_mcp2_time != 0)
+        {
+            h1_mcp_tdiff->Fill(last_mcp1_time-last_mcp2_time);
+            last_mcp1_time = 0; 
+            last_mcp2_time = 0;
+        }
+        
+
         if (entryMCP1.Trigger_Time != 0 && entryMCP2.Trigger_Time != 0)
         {   
-            Long64_t tdiff = entryMCP1.Trigger_Time - entryMCP2.Trigger_Time;
-            h1_mcp_tdiff->Fill(tdiff);
+            // Long64_t tdiff = entryMCP1.Trigger_Time - entryMCP2.Trigger_Time;
+            // h1_mcp_tdiff->Fill(tdiff);
+            Long64_t tdiff = 0;
         
             Long64_t xdiffMCP1 = entryMCP1.X1 - entryMCP1.X2;
             Long64_t ydiffMCP1 = entryMCP1.Y1 - entryMCP1.Y2;

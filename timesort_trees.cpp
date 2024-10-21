@@ -316,7 +316,7 @@ int main()
   std::string SfolderPath = folderPath + "/timesorted";
   // if (!fs::exists(SfolderPath)) fs::create_directories(SfolderPath);
   const char* dirName = SfolderPath.c_str();
-  
+
   // Create directory with read/write/search permissions for owner, and read/search for group and others.
   mkdir(dirName, 0755);
 

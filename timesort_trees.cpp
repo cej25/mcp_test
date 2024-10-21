@@ -27,9 +27,10 @@
 #include <TMath.h>
 #include <cstdlib>
 #include <TStyle.h> // Include the header file for gStyle
-#include <filesystem>
+#include <sys/stat.h> // For mkdir
+// #include <filesystem>
 
-namespace fs = std::filesystem;
+// namespace fs = std::filesystem;
 
 // :::::::::::::::::: TIME SORTER / EVENT CONSTRUCTOR :::::::::::::::::::::::::::::::::::: //
 // :: This program..                                                                       //
@@ -313,7 +314,11 @@ int main()
 {
   std::string folderPath = Ordner + Runname + "/" + dataformat;
   std::string SfolderPath = folderPath + "/timesorted";
-  if (!fs::exists(SfolderPath)) fs::create_directories(SfolderPath);
+  // if (!fs::exists(SfolderPath)) fs::create_directories(SfolderPath);
+  const char* dirName = SfolderPath.c_str();
+  
+  // Create directory with read/write/search permissions for owner, and read/search for group and others.
+  mkdir(dirName, 0755);
 
   std::string baseFileName = folderPath + "/Data_" + Runname;
   std::string SfileName = SfolderPath + "/Data_" + Runname;

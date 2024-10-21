@@ -31,8 +31,9 @@
 #include <cstdlib>
 #include <TStyle.h> // Include the header file for gStyle
 #include "TCutG.h"
+#include <sys/stat.h> // For mkdir
 
-namespace fs = std::filesystem;
+// namespace fs = std::filesystem;
 
 // :::::::::::::::::: HISTOGRAM PLOTTER / ANALYSIS ::::::::::::::::::::::::::::::::::::::: //
 // :: This program..                                                                       //
@@ -162,7 +163,11 @@ int main()
   std::string folderPath = Ordner + Runname + "/" + dataformat;
   std::string SfolderPath = folderPath + "/timesorted";
   std::string HfolderPath = folderPath + "/histograms";
-  if (!fs::exists(HfolderPath)) fs::create_directories(HfolderPath);
+  //if (!fs::exists(HfolderPath)) fs::create_directories(HfolderPath);
+  const char* dirName = HfolderPath.c_str();
+    
+  // Create directory with read/write/search permissions for owner, and read/search for group and others.
+  mkdir(dirName, 0755);
 
   std::string baseFileName = SfolderPath + "/Data_" + Runname;
   std::string HfileName = HfolderPath + "/Data_" + Runname + "_histograms.root";

@@ -1,0 +1,2 @@
+g++ -o time_sorter_exe timesort_trees.cpp $(root-config --cflags --glibs) -Werror
+./time_sorter_exe

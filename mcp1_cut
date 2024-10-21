@@ -1,0 +1,19 @@
+{
+//========= Macro generated from object: CUTG/Graph
+//========= by ROOT version6.32.06
+   
+   TCutG *tshape = new TCutG("tshape",8);
+   tshape->SetVarX("DDL Heatmap MCP1");
+   tshape->SetVarY("");
+   tshape->SetTitle("Graph");
+   tshape->SetFillStyle(1000);
+   tshape->SetPoint(0,-44951.4,9486.16);
+   tshape->SetPoint(1,-48494.4,-1243.8);
+   tshape->SetPoint(2,-44287.1,-5075.93);
+   tshape->SetPoint(3,-39636.9,-477.374);
+   tshape->SetPoint(4,-38751.1,5654.03);
+   tshape->SetPoint(5,-40744.1,9102.95);
+   tshape->SetPoint(6,-43844.2,9102.95);
+   tshape->SetPoint(7,-44951.4,9486.16);
+   tshape->Draw("");
+}

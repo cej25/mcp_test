@@ -1,0 +1,2 @@
+g++ -o intermediate_sort_exe intermediate_sort.cpp $(root-config --cflags --glibs) -Werror
+./intermediate_sort_exe

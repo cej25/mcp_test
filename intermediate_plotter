@@ -1,2 +1,0 @@
-g++ -o plotter_intermediate plot_from_intermediate.cpp $(root-config --cflags --glibs) -Werror
-./plotter_intermediate

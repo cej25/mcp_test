@@ -1,2 +1,2 @@
-g++ -o builder event_builder.cpp $(root-config --cflags --glibs) -Werror
-./builder
+g++ -o histogram_plot_exe plot_histograms.cpp $(root-config --cflags --glibs) -Werror
+./histogram_plot_exe

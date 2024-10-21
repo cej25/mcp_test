@@ -32,13 +32,19 @@
 
 namespace fs = std::filesystem;
 
+// :::::::::::::::::: TIME SORTER / EVENT CONSTRUCTOR :::::::::::::::::::::::::::::::::::: //
+// :: This program..                                                                       //
+// :: 1. Orders raw events by timestamp.                                                   //
+// :: 2. Constructs MCP events.                                                            //
+// :: 3. Orders MCP events by timestamp.                                                   //
+// :: 4. Writes MCP event information to a tree "SortedData".                              // 
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: //
 
-std::string Ordner = "./";
-std::string Runname = "run_9";        // no
-std::string dataformat = "UNFILTERED"; // no/
-int refreshcounter = 20000;            // wie oft soll der plotter geupdatet werden
-int sleeptimer = 1;                    // in sekunden
-std::string checkfile = "Data_run*.root";
+
+std::string Ordner = "../"; // path to run folder
+std::string Runname = "run_9"; // run number
+std::string dataformat = "UNFILTERED"; // only UNFILTERED seems to work/be helpful right now.. 
+std::string checkfile = "Data_run*.root"; // name convention; used to check # of subruns in folder
 
 // structure erstellen
 struct Entry
@@ -48,7 +54,20 @@ struct Entry
   UShort_t Energy;
   UShort_t Board;
 };
-// timestamp sorting
+
+// Store MCP information to track events
+struct EntryMCP
+{
+    ULong64_t Trigger_Time;
+    Long64_t X1;
+    Long64_t X2;
+    Long64_t Y1;
+    Long64_t Y2;
+    Bool_t Complete; // true or false
+    Int_t MCP; // 1 or 2
+};
+
+// Sort by timestamp and construct event
 void sortAndFillTree(const char *inputFileName, const char *outputFileName)
 {
   // Open the input file and get the TTree
@@ -72,7 +91,7 @@ void sortAndFillTree(const char *inputFileName, const char *outputFileName)
   {
     inputTree->GetEntry(i);
   
-    // should apply proper mapping function at some point
+    // timestamp shift for MPC2? doesn't seem necessary
     // if ((entry.Board == 0 && entry.Channel == 5) || (entry.Board == 0 && entry.Channel == 6) || (entry.Board == 0 && entry.Channel == 7) || (entry.Board == 1 && entry.Channel == 0) || (entry.Board == 1 && entry.Channel == 1)) 
     // {
     //   entry.Timestamp -= 90000;
@@ -82,39 +101,183 @@ void sortAndFillTree(const char *inputFileName, const char *outputFileName)
 
   }
 
-  // Sort the entries based on the timestamps in ascending order
-  // std::cerr << "starrrsorting." << std::endl;
-
+  // Sort raw data entries by time
   std::sort(sortedEntries.begin(), sortedEntries.end(), [](const Entry &a, const Entry &b)
             { return a.Timestamp < b.Timestamp; });
-  // std::cerr << "starr2rsorting." << std::endl;
 
   // Clear the original TTree
   inputTree->Reset();
 
+  std::cout << "Time sorted. Constructing events.." << std::endl;
+
+  // keep track of event informations
+  EntryMCP entryMCP1;
+  entryMCP1.MCP = 1;
+  EntryMCP entryMCP2;
+  entryMCP2.MCP = 2;
+
+  // counters
+  int ch1counter = 0;
+  int ch2counter = 0;
+  int ch3counter = 0;
+  int ch4counter = 0;
+  int ch6counter = 0;
+  int ch7counter = 0;
+  int ch8counter = 0;
+  int ch9counter = 0;
+
+  std::vector<EntryMCP> all_events;
+
+  for (auto const & entry : sortedEntries)
+  {
+      if (entry.Channel == 0 && entry.Board == 0)
+		  {
+          // Sort MCP1 events
+          if (entryMCP1.Trigger_Time != 0)
+          {
+              // put entry in vector
+              if (entryMCP1.X1 != 0 && entryMCP1.X2 != 0 && entryMCP1.Y1 != 0 && entryMCP1.Y2 != 0)
+              {
+                  // entry is "Complete"
+                  entryMCP1.Complete = true;
+              }
+              else entryMCP1.Complete = false;
+
+              all_events.emplace_back(entryMCP1);
+
+              // Reset entry
+              entryMCP1.Trigger_Time = 0;
+              entryMCP1.X1 = 0;
+              entryMCP1.X2 = 0;
+              entryMCP1.Y1 = 0;
+              entryMCP1.Y2 = 0;
+              entryMCP1.Complete = false;
+          }
+
+          entryMCP1.Trigger_Time = entry.Timestamp;
+
+          ch1counter = 0;
+          ch2counter = 0;
+          ch3counter = 0;
+          ch4counter = 0;
+      }
+
+      if (entry.Channel == 5 && entry.Board == 0)
+      {
+          // Sort MCP2 events
+          if (entryMCP2.Trigger_Time != 0)
+          {
+              // put entry in vector
+              if (entryMCP2.X1 != 0 && entryMCP2.X2 != 0 && entryMCP2.Y1 != 0 && entryMCP2.Y2 != 0)
+              {
+                  // entry is "Complete"
+                  entryMCP2.Complete = true;
+              }
+              else entryMCP2.Complete = false;
+
+              all_events.emplace_back(entryMCP2);
+
+              // Reset entry
+              entryMCP2.Trigger_Time = 0;
+              entryMCP2.X1 = 0;
+              entryMCP2.X2 = 0;
+              entryMCP2.Y1 = 0;
+              entryMCP2.Y2 = 0;
+              entryMCP2.Complete = false;
+          }
+
+          entryMCP2.Trigger_Time = entry.Timestamp;
+
+          ch6counter = 0;
+          ch7counter = 0;
+          ch8counter = 0;
+          ch9counter = 0;
+
+      }
+
+      if (entry.Channel == 1 && entry.Board == 0 && ch1counter == 0)
+      {
+          entryMCP1.X1 = entry.Timestamp;
+          ch1counter++;
+      }
+      else if (entry.Channel == 2 && entry.Board == 0 && ch2counter == 0)
+      {
+          entryMCP1.X2 = entry.Timestamp;
+          ch2counter++;
+      }
+      else if (entry.Channel == 3 && entry.Board == 0 && ch3counter == 0)
+      {
+          entryMCP1.Y1 = entry.Timestamp;
+          ch3counter++;
+      }
+      else if (entry.Channel == 4 && entry.Board == 0 && ch4counter == 0)
+      {
+          entryMCP1.Y2 = entry.Timestamp;
+          ch4counter++;
+      }
+      else if (entry.Channel == 6 && entry.Board == 0 && ch6counter == 0)
+      {
+          entryMCP2.X1 = entry.Timestamp;
+          ch6counter++;
+      }
+      else if (entry.Channel == 7 && entry.Board == 0 && ch7counter == 0)
+      {
+          entryMCP2.X2 = entry.Timestamp;
+          ch7counter++;
+      }
+      else if (entry.Channel == 0 && entry.Board == 1 && ch8counter == 0)
+      {
+          entryMCP2.Y1 = entry.Timestamp;
+          ch8counter++;
+      }
+      else if (entry.Channel == 1 && entry.Board == 1 && ch9counter == 0)
+      {
+          entryMCP2.Y2 = entry.Timestamp;
+          ch9counter++;
+      }
+
+  } // sorted entries loop
+
+
+  std::cout << "Events constructed. Correcting time order.." << std::endl;
+  std::sort(all_events.begin(), all_events.end(), [](const EntryMCP &a, const EntryMCP &b)
+            { return a.Trigger_Time < b.Trigger_Time; });
+
+  std::cout << "Time ordering correct. Writing Tree.." << std::endl;
+
   // Create a new output file and TTree
-  TFile outputFile(outputFileName, "recreate");
+  TFile outputFile(outputFileName, "RECREATE");
   TTree *outputTree = new TTree("SortedData", "Sorted Tree");
 
   // Create variables to hold the sorted entries
-  UShort_t sortedChannel;
-  ULong64_t sortedTimestamp;
-  UShort_t sortedEnergy;
-  UShort_t sortedBoard;
-
+  ULong64_t Trigger_Time;
+  Long64_t X1;
+  Long64_t X2;
+  Long64_t Y1;
+  Long64_t Y2;
+  Bool_t Complete;
+  Int_t MCP;
+   
   // Set the branch addresses for writing
-  outputTree->Branch("Channel", &sortedChannel);
-  outputTree->Branch("Timestamp", &sortedTimestamp);
-  outputTree->Branch("Energy", &sortedEnergy);
-  outputTree->Branch("Board", &sortedBoard);
+  outputTree->Branch("Trigger_Time", &Trigger_Time);
+  outputTree->Branch("X1", &X1);
+  outputTree->Branch("X2", &X2);
+  outputTree->Branch("Y1", &Y1);
+  outputTree->Branch("Y2", &Y2);
+  outputTree->Branch("Complete", &Complete);
+  outputTree->Branch("MCP", &MCP);
+
   // Loop over the sorted entries array and fill the new TTree
-  for (const auto &sortedEntry : sortedEntries)
+  for (const auto &event : all_events)
   {
-    sortedChannel = sortedEntry.Channel;
-    sortedTimestamp = sortedEntry.Timestamp;
-    sortedEnergy = sortedEntry.Energy;
-    sortedBoard = sortedEntry.Board;
-    outputTree->Fill();
+      Trigger_Time = event.Trigger_Time;
+      X1 = event.X1;
+      X2 = event.X2;
+      Y1 = event.Y1;
+      Y2 = event.Y2;
+      Complete = event.Complete;
+      MCP = event.MCP;
+      outputTree->Fill();
   }
 
   outputTree->Write();
@@ -153,7 +316,7 @@ int main()
   std::string SfolderPath = folderPath + "/timesorted";
   if (!fs::exists(SfolderPath)) fs::create_directories(SfolderPath);
 
-  std::string baseFileName = Ordner + Runname + "/" + dataformat + "/Data_" + Runname;
+  std::string baseFileName = folderPath + "/Data_" + Runname;
   std::string SfileName = SfolderPath + "/Data_" + Runname;
 
   std::cout << ": " << folderPath << std::endl;

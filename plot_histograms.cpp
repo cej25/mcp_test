@@ -245,6 +245,19 @@ int main()
             {
                 completeMCP1++;
 
+                Long64_t xdiffMCP1 = *X1-*X2;
+                Long64_t ydiffMCP1 = *Y1-*Y2;
+                h2_DDL_heatmap_MCP1->Fill(xdiffMCP1, ydiffMCP1);
+
+                if (xdiffMCP1 > gates[0] && xdiffMCP1 < gates[1] && ydiffMCP1 > gates[2] && ydiffMCP1 < gates[3])
+                {
+                    h1_deltaX_mcp1->Fill(xdiffMCP1);
+                }
+                if (xdiffMCP1 > gates[6] && xdiffMCP1 < gates[7] && ydiffMCP1 > gates[4] && ydiffMCP1 < gates[5])
+                {
+                    h1_deltaY_mcp1->Fill(ydiffMCP1);
+                }
+
                 if (countMCP1 == 0)
                 {
                     entryMCP1.Trigger_Time = *Trigger_Time;
@@ -264,6 +277,19 @@ int main()
             if (*Complete)
             {
                 completeMCP2++;
+
+                Long64_t xdiffMCP2 = *X1-*X2;
+                Long64_t ydiffMCP2 = *Y1-*Y2;
+                h2_DDL_heatmap_MCP2->Fill(xdiffMCP2, ydiffMCP2);
+
+                if (xdiffMCP2 > gates[0] && xdiffMCP2 < gates[1] && ydiffMCP2 > gates[2] && ydiffMCP2 < gates[3])
+                {
+                    h1_deltaX_mcp2->Fill(xdiffMCP2);
+                }
+                if (xdiffMCP2 > gates[6] && xdiffMCP2 < gates[7] && ydiffMCP2 > gates[4] && ydiffMCP2 < gates[5])
+                {
+                    h1_deltaY_mcp2->Fill(ydiffMCP2);
+                }
 
                 if (countMCP2 == 0)
                 {
@@ -290,27 +316,27 @@ int main()
             Long64_t xdiffMCP2 = entryMCP2.X1 - entryMCP2.X2;
             Long64_t ydiffMCP2 = entryMCP2.Y1 - entryMCP2.Y2;
             
-
-            h2_DDL_heatmap_MCP1->Fill(xdiffMCP1, ydiffMCP1);
-            if (xdiffMCP1 > gates[0] && xdiffMCP1 < gates[1] && ydiffMCP1 > gates[2] && ydiffMCP1 < gates[3])
-            {
-                h1_deltaX_mcp1->Fill(xdiffMCP1);
-            }
-            if (xdiffMCP1 > gates[6] && xdiffMCP1 < gates[7] && ydiffMCP1 > gates[4] && ydiffMCP1 < gates[5])
-            {
-                h1_deltaY_mcp1->Fill(ydiffMCP1);
-            }
+            // should we plot a version of these histograms when we have a full event?
+            //h2_DDL_heatmap_MCP1->Fill(xdiffMCP1, ydiffMCP1);
+            // if (xdiffMCP1 > gates[0] && xdiffMCP1 < gates[1] && ydiffMCP1 > gates[2] && ydiffMCP1 < gates[3])
+            // {
+            //     h1_deltaX_mcp1->Fill(xdiffMCP1);
+            // }
+            // if (xdiffMCP1 > gates[6] && xdiffMCP1 < gates[7] && ydiffMCP1 > gates[4] && ydiffMCP1 < gates[5])
+            // {
+            //     h1_deltaY_mcp1->Fill(ydiffMCP1);
+            // }
 
             
-            h2_DDL_heatmap_MCP2->Fill(xdiffMCP2, ydiffMCP2);
-            if (xdiffMCP2 > gates[0] && xdiffMCP2 < gates[1] && ydiffMCP2 > gates[2] && ydiffMCP2 < gates[3])
-            {
-                h1_deltaX_mcp2->Fill(xdiffMCP2);
-            }
-            if (xdiffMCP2 > gates[6] && xdiffMCP2 < gates[7] && ydiffMCP2 > gates[4] && ydiffMCP2 < gates[5])
-            {
-                h1_deltaY_mcp2->Fill(ydiffMCP2);
-            }
+            //h2_DDL_heatmap_MCP2->Fill(xdiffMCP2, ydiffMCP2);
+            // if (xdiffMCP2 > gates[0] && xdiffMCP2 < gates[1] && ydiffMCP2 > gates[2] && ydiffMCP2 < gates[3])
+            // {
+            //     h1_deltaX_mcp2->Fill(xdiffMCP2);
+            // }
+            // if (xdiffMCP2 > gates[6] && xdiffMCP2 < gates[7] && ydiffMCP2 > gates[4] && ydiffMCP2 < gates[5])
+            // {
+            //     h1_deltaY_mcp2->Fill(ydiffMCP2);
+            // }
 
             // Gate on time difference between MCPs
             if (tdiff > tdiff_gates[0] && tdiff < tdiff_gates[1])
